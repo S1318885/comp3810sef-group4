@@ -78,4 +78,4 @@ cd comp3810sef-group4
 npm install
 
 # 3. Set up environment variables
-# Create a .env file in the root directory
+npm start
