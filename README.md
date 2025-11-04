@@ -1,4 +1,4 @@
-# Task Reminder System
+# COMP 3810 Group 4 
 
 A web-based **Task Reminder System** built with **Express.js**, **MongoDB**, and **EJS** that allows users to manage daily tasks efficiently. Users can register, log in, and perform full **CRUD operations** on tasks with a clean and intuitive interface. The system also exposes **RESTful APIs** for programmatic task management.
 
