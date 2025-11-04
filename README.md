@@ -71,7 +71,7 @@ Follow these steps to run the project locally:
 
 ```bash
 # 1. Clone the repository
-git clone [https://github.com/group4/comp3810sef-group4.git](https://github.com/S1318885/comp3810sef-group4.git)
+git clone https://github.com/S1318885/comp3810sef-group4.git
 cd comp3810sef-group4
 
 # 2. Install dependencies
