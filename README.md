@@ -16,7 +16,7 @@ A web-based **System** built with **Express.js**, **MongoDB**, and **EJS** that 
 
 ## Project Description
 
-The **Task Reminder System** enables users to:
+The **System** enables users to:
 
 - Register and log in securely using session-based authentication
 - Create, view, update, and delete personal tasks
