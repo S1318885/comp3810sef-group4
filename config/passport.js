@@ -1,11 +1,12 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('../models/user');
 
 passport.use(new GoogleStrategy({
   clientID: '1033323949067-vvplohn7feaq757ppa659stthf6pc1la.apps.googleusercontent.com',
   clientSecret: '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',
-  callbackURL: '/auth/google/callback'
+  callbackURL: 'http://localhost:3000/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
@@ -13,6 +14,26 @@ passport.use(new GoogleStrategy({
       const username = profile.emails[0].value.split('@')[0];
       user = await new User({
         googleId: profile.id,
+        username: username,
+      }).save();
+    }
+    return done(null, user);
+  } catch (err) {
+    return done(err);
+  }
+}));
+
+passport.use(new FacebookStrategy({
+  clientID: '698339182894543',
+  clientSecret: 'c69554a5088ac22058e55e10769443f2',
+  callbackURL: 'http://localhost:3000/auth/facebook/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    let user = await User.findOne({ facebookId: profile.id });
+    if (!user) {
+      const username = profile.displayName.replace(/\s+/g, '').toLowerCase() || `fb_${profile.id}`;
+      user = await new User({
+        facebookId: profile.id,
         username: username,
       }).save();
     }
