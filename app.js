@@ -1,9 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cookieSession = require('cookie-session');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const passport = require('passport');
+
+require('./config/passport');
 
 const app = express();
 
@@ -12,11 +15,16 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cookieSession({
-  name: 'session',
-  keys: ['s3cr3tK3y!2025'],
-  maxAge: 24 * 60 * 60 * 1000
+
+app.use(session({
+  secret: 's3cr3tK3y!2025',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 const uri = 'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/3810SEFDB?retryWrites=true&w=majority';
 mongoose.connect(uri)
@@ -27,20 +35,24 @@ const Task = require('./models/task');
 const User = require('./models/user');
 
 const isAuthenticated = (req, res, next) => {
-  if (req.session.authenticated) return next();
+  if (req.isAuthenticated()) {
+    req.session.username = req.user.username;
+    return next();
+  }
   res.redirect('/login');
 };
-
 
 app.get('/', (req, res) => res.redirect('/login'));
 
 app.get('/login', (req, res) => res.render('login'));
 app.post('/login', async (req, res) => {
   const user = await User.findOne({ username: req.body.username });
-  if (user && await bcrypt.compare(req.body.password, user.password)) {
-    req.session.authenticated = true;
-    req.session.username = user.username;
-    res.redirect('/crud');
+  if (user && user.password && await bcrypt.compare(req.body.password, user.password)) {
+    req.login(user, (err) => { 
+      if (err) return next(err);
+      req.session.username = user.username;
+      res.redirect('/crud');
+    });
   } else {
     res.status(401).send('Invalid credentials');
   }
@@ -57,9 +69,23 @@ app.post('/register', async (req, res) => {
 });
 
 app.get('/logout', (req, res) => {
-  req.session = null;
-  res.redirect('/login');
+  req.logout(() => {
+    req.session.destroy();
+    res.redirect('/login');
+  });
 });
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    req.session.username = req.user.username;
+    res.redirect('/crud');
+  }
+);
 
 app.get('/crud', isAuthenticated, async (req, res) => {
   const { search, status, sort } = req.query;
@@ -80,14 +106,18 @@ app.get('/crud', isAuthenticated, async (req, res) => {
 });
 
 app.post('/crud', isAuthenticated, async (req, res) => {
-  await new Task({ title: req.body.title, description: req.body.description }).save();
+  await new Task({
+    title: req.body.title,
+    description: req.body.description,
+    userId: req.user._id
+  }).save();
   res.redirect('/crud');
 });
 
 app.get('/crud/edit/:id', isAuthenticated, async (req, res) => {
   const task = await Task.findById(req.params.id);
   if (!task) return res.status(404).send('Not found');
-  res.render('edit', { task, username: req.session.username });
+  res.render('edit', { task, username: res.locals.displayName });
 });
 
 app.post('/crud/update/:id', isAuthenticated, async (req, res) => {
