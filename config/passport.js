@@ -4,8 +4,8 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('../models/user');
 
 passport.use(new GoogleStrategy({
-  clientID: '1033323949067-vvplohn7feaq757ppa659stthf6pc1la.apps.googleusercontent.com',
-  clientSecret: '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',
+  clientID: '1033323949067-c99moo810qjo9kq1h775pbear8h1584c.apps.googleusercontent.com',
+  clientSecret: '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',
   callbackURL: 'http://localhost:3000/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
