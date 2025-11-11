@@ -22,7 +22,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: mongostore.create({
-    mongoUrl: process.env.MONGODB_URI || 'your-mongodb-connection-string',
+    mongoUrl: process.env.MONGODB_URI || 'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/3810SEFDB?retryWrites=true&w=majority',
     collectionName: 'sessions'
   }),
   cookie: { 
