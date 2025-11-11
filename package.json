@@ -1,7 +1,7 @@
 {
-  "name": "server-app",
+  "name": "task-manager-auth",
   "version": "1.0.0",
-  "description": "Server-side CRUD app with auth, REST API, and EJS",
+  "description": "Secure Task Manager with Local + OAuth Login (No .env)",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
@@ -18,6 +18,6 @@
     "passport-google-oauth20": "^2.0.0"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   }
 }
