@@ -6,7 +6,7 @@ const User = require('../models/user');
 passport.use(new GoogleStrategy({
   clientID: '931800171713-arjpcmf0tfg8hjdhqvjhb8e50qkn6pf9.apps.googleusercontent.com',
   clientSecret: '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',
-  callbackURL: 'http://localhost:3000/auth/google/callback'
+  callbackURL: 'https://comp3810sef-group4.onrender.com/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
@@ -26,7 +26,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
   clientID: '847235911090738',
   clientSecret: '4cd2fbef7f1161ae984e1838037a2a08',
-  callbackURL: 'http://localhost:3000/auth/facebook/callback' 
+  callbackURL: 'https://comp3810sef-group4.onrender.com/auth/facebook/callback' 
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ facebookId: profile.id });
