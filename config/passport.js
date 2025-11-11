@@ -24,8 +24,8 @@ passport.use(new GoogleStrategy({
 }));
 
 passport.use(new FacebookStrategy({
-  clientID: '698339182894543',
-  clientSecret: 'c69554a5088ac22058e55e10769443f2',
+  clientID: '847235911090738',
+  clientSecret: '4cd2fbef7f1161ae984e1838037a2a08',
   callbackURL: '/auth/facebook/callback'
 }, async (accessToken, refreshToken, profile, done) => {
   try {
