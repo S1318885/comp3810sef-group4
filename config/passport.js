@@ -26,7 +26,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
   clientID: '847235911090738',
   clientSecret: '4cd2fbef7f1161ae984e1838037a2a08',
-  callbackURL: '/auth/facebook/callback'
+  callbackURL: 'http://localhost:3000/auth/facebook/callback' 
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ facebookId: profile.id });
@@ -54,4 +54,4 @@ passport.deserializeUser(async (id, done) => {
   } catch (err) {
     done(err);
   }
-});
+}));
