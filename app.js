@@ -1,11 +1,11 @@
-const express   = require('express');
-const mongoose  = require('mongoose');
-const session   = require('express-session');
-const MongoStore= require('connect-mongo');
-const bodyParser= require('body-parser');
-const bcrypt    = require('bcrypt');
-const path      = require('path');
-const passport  = require('passport');
+const express = require('express');
+const mongoose = require('mongoose');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const path = require('path');
+const passport = require('passport');
 
 const Task = require('./models/task');
 const User = require('./models/user');
@@ -13,14 +13,16 @@ require('./config/passport');
 
 const app = express();
 
+const MONGODB_URI = 'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/3810SEFDB?retryWrites=true&w=majority';
+const SESSION_SECRET = 's3cr3tK3y!2025';
+const CALLBACK_URL = 'https://comp3810sef-group4.onrender.com'; 
+const NODE_ENV = 'production'; 
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
-const MONGODB_URI =
-  'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/3810SEFDB?retryWrites=true&w=majority';
 
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected – 3810SEFDB'))
@@ -53,13 +55,13 @@ function attachMiddleware() {
   }
 
   app.use(session({
-    secret: 's3cr3tK3y!2025',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
-      secure: process.env.NODE_ENV === 'production',
+      secure: NODE_ENV === 'production',
       httpOnly: true,
       sameSite: 'lax'
     }
@@ -125,6 +127,7 @@ function startRoutes() {
       res.redirect('/crud');
     }
   );
+
   app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
   app.get('/auth/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
@@ -133,7 +136,6 @@ function startRoutes() {
       res.redirect('/crud');
     }
   );
-
 
   app.get('/crud', isAuthenticated, async (req, res) => {
     const { search, status, sort } = req.query;
@@ -184,8 +186,7 @@ function startRoutes() {
     await Task.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
     res.redirect('/crud');
   });
-
-
+  
   app.get('/api/tasks', async (req, res) => res.json(await Task.find()));
   app.post('/api/tasks', async (req, res) => {
     const t = new Task(req.body);
@@ -213,13 +214,11 @@ function startRoutes() {
     res.json(tasks);
   });
 
+  app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).send('Something went wrong');
+  });
 
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
-
-
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).send('Something went wrong');
-});
