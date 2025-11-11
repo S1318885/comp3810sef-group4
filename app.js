@@ -22,7 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const MONGODB_URI =
   'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/3810SEFDB?retryWrites=true&w=majority';
 
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected – 3810SEFDB'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
@@ -58,7 +58,7 @@ function attachMiddleware() {
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000,               
+      maxAge: 24 * 60 * 60 * 1000,
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       sameSite: 'lax'
@@ -87,19 +87,13 @@ function startRoutes() {
   app.get('/', (req, res) => res.redirect('/login'));
 
   app.get('/login', (req, res) => res.render('login'));
-
   app.post('/login', async (req, res, next) => {
     const { username, password } = req.body;
     try {
       const user = await User.findOne({ username });
-      if (!user || !user.password) {
+      if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
         return res.status(401).send('Invalid credentials');
       }
-      const match = await bcrypt.compare(password, user.password);
-      if (!match) {
-        return res.status(401).send('Invalid credentials');
-      }
-
       req.login(user, err => {
         if (err) return next(err);
         req.session.username = user.username;
@@ -109,12 +103,9 @@ function startRoutes() {
   });
 
   app.get('/register', (req, res) => res.render('register'));
-
   app.post('/register', async (req, res) => {
     const { username, password } = req.body;
-    if (await User.findOne({ username })) {
-      return res.status(400).send('Username taken');
-    }
+    if (await User.findOne({ username })) return res.status(400).send('Username taken');
     const hashed = await bcrypt.hash(password, 10);
     await new User({ username, password: hashed }).save();
     res.redirect('/login');
@@ -126,9 +117,7 @@ function startRoutes() {
     });
   });
 
-  app.get('/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
+  app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
   app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
@@ -136,10 +125,7 @@ function startRoutes() {
       res.redirect('/crud');
     }
   );
-
-  app.get('/auth/facebook',
-    passport.authenticate('facebook', { scope: ['email'] })
-  );
+  app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
   app.get('/auth/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
     (req, res) => {
