@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const passport = require('passport');
-const mongostore = require('connect-mongo');
 
 require('./config/passport');
 
@@ -21,16 +20,7 @@ app.use(session({
   secret: 's3cr3tK3y!2025',
   resave: false,
   saveUninitialized: false,
-  store: mongostore.create({
-    mongoUrl: process.env.MONGODB_URI || 'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/3810SEFDB?retryWrites=true&w=majority',
-    collectionName: 'sessions'
-  }),
-  cookie: { 
-    maxAge: 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === 'production', 
-    httpOnly: true,
-    sameSite: 'lax' 
-  }
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 app.use(passport.initialize());
