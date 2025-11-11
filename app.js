@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const passport = require('passport');
-const MongoStore = require('connect-mongo');
+const mongostore = require('connect-mongo');
 
 require('./config/passport');
 
@@ -21,7 +21,7 @@ app.use(session({
   secret: 's3cr3tK3y!2025',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
+  store: mongostore.create({
     mongoUrl: process.env.MONGODB_URI || 'your-mongodb-connection-string',
     collectionName: 'sessions'
   }),
