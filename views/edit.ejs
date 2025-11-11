@@ -9,16 +9,14 @@
 </head>
 
 <body>
-  <div class="container">
-    <h1>Edit Task | <a href="/logout">Logout</a></h1>
-    <form method="POST" action="/crud/update/<%= task._id %>">
-      <div><label>Title</label><input type="text" name="title" value="<%= task.title %>" required></div>
-      <div><label>Description</label><input type="text" name="description" value="<%= task.description %>"></div>
-      <div><label><input type="checkbox" name="completed" <%=task.completed?'checked':'' %>> Completed</label></div>
-      <button type="submit">Update</button>
-    </form>
-    <a href="/crud">Back</a>
-  </div>
+  <h1>Edit Task – <%= username %></h1>
+  <form action="/crud/update/<%= task._id %>" method="POST">
+    <input type="text" name="title" value="<%= task.title %>" required><br><br>
+    <textarea name="description"><%= task.description %></textarea><br><br>
+    <label><input type="checkbox" name="completed" <%= task.completed?'checked':'' %>> Completed</label><br><br>
+    <button type="submit">Save</button>
+  </form>
+  <a href="/crud">Back</a>
 </body>
 
 </html>
