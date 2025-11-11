@@ -22,7 +22,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   store: mongostore.create({
-    mongoUrl: uri,
+    mongoUrl: 'uri',
     collectionName: 'sessions'
   }),
   cookie: { 
