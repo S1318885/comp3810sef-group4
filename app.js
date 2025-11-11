@@ -55,16 +55,30 @@ const isAuthenticated = (req, res, next) => {
 app.get('/', (req, res) => res.redirect('/login'));
 
 app.get('/login', (req, res) => res.render('login'));
-app.post('/login', async (req, res) => {
-  const user = await User.findOne({ username: req.body.username });
-  if (user && user.password && await bcrypt.compare(req.body.password, user.password)) {
-    req.login(user, (err) => { 
+app.post('/login', async (req, res, next) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(401).send('Invalid credentials');
+
+    if (user.password) {
+      if (!password) return res.status(401).send('Password required');
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) return res.status(401).send('Invalid credentials');
+    }
+
+    else if (!user.googleId && !user.facebookId) {
+      return res.status(401).send('Invalid login method');
+    }
+
+    req.login(user, (err) => {
       if (err) return next(err);
       req.session.username = user.username;
       res.redirect('/crud');
     });
-  } else {
-    res.status(401).send('Invalid credentials');
+  } catch (err) {
+    next(err);
   }
 });
 
