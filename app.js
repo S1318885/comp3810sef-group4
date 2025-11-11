@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const path = require('path');
 const passport = require('passport');
+const MongoStore = require('connect-mongo');
 
 require('./config/passport');
 
