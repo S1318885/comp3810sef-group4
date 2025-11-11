@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const MONGODB_URI =
-  '"mongodb+srv://cluster0.irowwas.mongodb.net/" --apiVersion 1 --username s1318885;
+  'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/';
 
 mongoose
   .connect(MONGODB_URI)
