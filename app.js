@@ -1,15 +1,14 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
-const bodyParser = require('body-parser');
-const bcrypt = require('bcrypt');
-const path = require('path');
-const passport = require('passport');
+const express   = require('express');
+const mongoose  = require('mongoose');
+const session   = require('express-session');
+const MongoStore= require('connect-mongo');
+const bodyParser= require('body-parser');
+const bcrypt    = require('bcrypt');
+const path      = require('path');
+const passport  = require('passport');
 
 const Task = require('./models/task');
 const User = require('./models/user');
-
 require('./config/passport');
 
 const app = express();
@@ -23,17 +22,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 const MONGODB_URI =
   'mongodb+srv://s1318885:13188853@cluster0.irowwas.mongodb.net/3810SEFDB?retryWrites=true&w=majority';
 
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('MongoDB connected – 3810SEFDB'))
   .catch(err => {
     console.error('MongoDB connection error:', err);
     process.exit(1);
   });
 
-let sessionStore;
+let sessionStore = null;
 
-mongoose.connection.once('open', () => {
-  console.log('MongoDB connection open – creating session store');
+function initSessionStore() {
+  if (sessionStore) return;
   sessionStore = MongoStore.create({
     client: mongoose.connection.getClient(),
     collectionName: 'sessions',
@@ -41,18 +40,25 @@ mongoose.connection.once('open', () => {
     autoRemove: 'interval',
     autoRemoveInterval: 10
   });
+  console.log('connect-mongo store ready');
+}
 
-  startServer();
-});
+mongoose.connection.once('open', initSessionStore);
+mongoose.connection.on('connected', initSessionStore);
 
-function attachSession() {
+function attachMiddleware() {
+  if (!sessionStore) {
+    initSessionStore();
+    if (!sessionStore) return setTimeout(attachMiddleware, 200);
+  }
+
   app.use(session({
     secret: 's3cr3tK3y!2025',
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
     cookie: {
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 24 * 60 * 60 * 1000,               
       secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
       sameSite: 'lax'
@@ -61,37 +67,49 @@ function attachSession() {
 
   app.use(passport.initialize());
   app.use(passport.session());
+
+  console.log('Session & Passport middleware attached');
+  startRoutes();
 }
 
-function startServer() {
-  attachSession();
+if (sessionStore) attachMiddleware();
+else mongoose.connection.once('open', attachMiddleware);
 
-  const isAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
-      req.session.username = req.user.username || req.user.displayName || 'User';
-      return next();
-    }
-    res.redirect('/login');
-  };
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
+    req.session.username = req.user.username || req.user.displayName || 'User';
+    return next();
+  }
+  res.redirect('/login');
+}
 
+function startRoutes() {
   app.get('/', (req, res) => res.redirect('/login'));
 
   app.get('/login', (req, res) => res.render('login'));
-  app.post('/login', async (req, res) => {
+
+  app.post('/login', async (req, res, next) => {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
-    if (user && user.password && await bcrypt.compare(password, user.password)) {
+    try {
+      const user = await User.findOne({ username });
+      if (!user || !user.password) {
+        return res.status(401).send('Invalid credentials');
+      }
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return res.status(401).send('Invalid credentials');
+      }
+
       req.login(user, err => {
         if (err) return next(err);
         req.session.username = user.username;
         res.redirect('/crud');
       });
-    } else {
-      res.status(401).send('Invalid credentials');
-    }
+    } catch (e) { next(e); }
   });
 
   app.get('/register', (req, res) => res.render('register'));
+
   app.post('/register', async (req, res) => {
     const { username, password } = req.body;
     if (await User.findOne({ username })) {
@@ -108,7 +126,9 @@ function startServer() {
     });
   });
 
-  app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+  app.get('/auth/google',
+    passport.authenticate('google', { scope: ['profile', 'email'] })
+  );
   app.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
@@ -117,7 +137,9 @@ function startServer() {
     }
   );
 
-  app.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+  app.get('/auth/facebook',
+    passport.authenticate('facebook', { scope: ['email'] })
+  );
   app.get('/auth/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/login' }),
     (req, res) => {
@@ -178,18 +200,18 @@ function startServer() {
 
   app.get('/api/tasks', async (req, res) => res.json(await Task.find()));
   app.post('/api/tasks', async (req, res) => {
-    const task = new Task(req.body);
-    await task.save();
-    res.status(201).json(task);
+    const t = new Task(req.body);
+    await t.save();
+    res.status(201).json(t);
   });
   app.put('/api/tasks/:id', async (req, res) => {
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!task) return res.status(404).json({ error: 'Not found' });
-    res.json(task);
+    const t = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!t) return res.status(404).json({ error: 'Not found' });
+    res.json(t);
   });
   app.delete('/api/tasks/:id', async (req, res) => {
-    const result = await Task.findByIdAndDelete(req.params.id);
-    if (!result) return res.status(404).json({ error: 'Not found' });
+    const r = await Task.findByIdAndDelete(req.params.id);
+    if (!r) return res.status(404).json({ error: 'Not found' });
     res.status(204).end();
   });
   app.get('/api/tasks/stats', async (req, res) => {
@@ -204,11 +226,10 @@ function startServer() {
   });
 
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 }
 
-mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err);
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).send('Something went wrong');
 });
