@@ -87,18 +87,6 @@ app.get('/auth/google/callback',
   }
 );
 
-app.get('/auth/facebook',
-  passport.authenticate('facebook', { scope: ['email'] })
-);
-
-app.get('/auth/facebook/callback',
-  passport.authenticate('facebook', { failureRedirect: '/login' }),
-  (req, res) => {
-    req.session.username = req.user.username;
-    res.redirect('/crud');
-  }
-);
-
 app.get('/crud', isAuthenticated, async (req, res) => {
   const { search, status, sort } = req.query;
   let query = {};
