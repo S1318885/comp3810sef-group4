@@ -48,11 +48,12 @@ passport.use(new FacebookStrategy({
   try {
     let user = await User.findOne({ facebookId: profile.id });
     if (!user) {
-      const email = profile.emails?.[0]?.value || `${profile.id}@facebook.com`;
+      const email = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
+      const username = profile.displayName.replace(/\s+/g, '').toLowerCase() ||fb_$(profile.id);
       user = await new User({
         facebookId: profile.id,
-        username: email,
-        displayName: `${profile.name.givenName} ${profile.name.familyName}`,
+        username: username,
+        email: email
       }).save();
     }
     return done(null, user);
