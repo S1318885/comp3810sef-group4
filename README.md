@@ -1,6 +1,11 @@
 # COMP 3810 Group 4 
 
-A web-based **System** built with **Express.js**, **MongoDB**, and **EJS** that allows users to manage daily tasks efficiently. Users can register, log in, and perform full **CRUD operations** on tasks with a clean and intuitive interface. The system also exposes **RESTful APIs** for programmatic task management.
+# Task Manager with Authentication (Local + Google OAuth)
+
+A full-stack **Task Management Application** built with **Node.js, Express, MongoDB, Passport.js**, and **EJS templating**. Supports both local username/password login and Google OAuth 2.0 authentication.
+
+Live Demo: [https://comp3810sef-group4.onrender.com ](https://comp3810sef-group4.onrender.com) 
+(Hosted on Render – may take a few seconds to wake up)
 
 ---
 
@@ -16,66 +21,81 @@ A web-based **System** built with **Express.js**, **MongoDB**, and **EJS** that 
 
 ## Project Description
 
-The **System** enables users to:
+### Features
 
-- Register and log in securely using session-based authentication
-- Create, view, update, and delete personal tasks
-- Search and filter tasks by keyword or completion status
-- Access task data via **RESTful APIs**
+- User registration & login (local)
+- Google OAuth Login
+- Create, Read, Update, Delete (CRUD) tasks
+- Mark tasks as completed/pending
+- Search tasks by title
+- Filter by status (All / Pending / Completed)
+- Sort by newest or oldest
+- Fully responsive design (mobile-friendly)
+- RESTful API endpoints for tasks
+- Secure password hashing with bcrypt
+- Session-based authentication
 
----
+### Tech Stack
 
-## Technologies Used
-
-| Category           | Technology                     |
-|--------------------|--------------------------------|
-| Web Framework      | Express.js                     |
-| Database           | MongoDB (via Mongoose)         |
-| Frontend           | EJS Templates                  |
-| Authentication     | cookie-session                 |
-| Cloud Deployment   | Render (Server) + MongoDB Atlas |
-
----
-
-## Features Implemented
-
-### 1. Authentication
-- Secure login & registration with `cookie-session`
-- Protected routes — only authenticated users can access task pages
-- Logout functionality available on all authenticated views
-
-### 2. CRUD Web Pages
-| Action  | Description |
-|--------|-------------|
-| **Create** | Add a new task with title and description |
-| **Read**   | View all tasks with search and filter options |
-| **Update** | Edit task details or mark as completed |
-| **Delete** | Permanently remove unwanted tasks |
-
-### 3. RESTful APIs
-
-| Function | Method  | Endpoint            | Description                        |
-|---------|--------|---------------------|------------------------------------|
-| Read    | `GET`    | `/api/tasks`        | Retrieve all tasks for the user    |
-| Create  | `POST`   | `/api/tasks`        | Add a new task                     |
-| Update  | `PUT`    | `/api/tasks/:id`    | Update task by ID                  |
-| Delete  | `DELETE` | `/api/tasks/:id`    | Delete task by ID                  |
-
-> All API routes are protected and require an authenticated session.
+| Technology             | Purpose                          |
+|-----------------------|-----------------------------------|
+| Node.js + Express     | Backend server                   |
+| MongoDB + Mongoose    | Database & ODM                   |
+| EJS                   | Server-side templating           |
+| Passport.js           | Authentication (Local + Google)  |
+| bcrypt                | Password hashing                 |
+| express-session       | Session management               |
+| Render                | Deployment (free tier)           |
 
 ---
 
-## Installation & Setup
+### Project Structure
+├── app.js                  # Main server file
+├── config/
+│   └── passport.js         # Passport Google Strategy
+├── models/
+│   ├── task.js             # Task Schema
+│   └── user.js             # User Schema
+├── views/                  # EJS templates
+│   ├── login.ejs
+│   ├── register.ejs
+│   ├── crud.ejs
+│   └── edit.ejs
+├── public/
+│   └── style.css           # Full custom styling
+├── package.json
+└── README.md
 
-Follow these steps to run the project locally:
 
+---
+
+### Local Setup (Development)
+ **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/task-manager-auth.git
+   cd task-manager-auth
+   npm install
+   npm start
+   ```
+
+###RESTful API Endpoints (for testing with cURL/Postman)
 ```bash
-# 1. Clone the repository
-git clone https://github.com/S1318885/comp3810sef-group4.git
-cd comp3810sef-group4
+# Get all tasks
+curl http://localhost:3000/api/tasks
 
-# 2. Install dependencies
-npm install
+# Create a task
+curl -X POST http://localhost:3000/api/tasks \
+  -H "Content-Type: application/json" \
+  -d '{"title":"API Task","description":"Created via cURL","completed":false,"userId":"670000000000000000000001"}'
 
-# 3. Set up environment variables
-npm start
+# Update task
+curl -X PUT http://localhost:3000/api/tasks/671f58a9d3f4b8a1e4f5c678 \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Updated via API","completed":true}'
+
+# Delete task
+curl -X DELETE http://localhost:3000/api/tasks/671f58a9d3f4b8a1e4f5c678
+```
+
+
+  
