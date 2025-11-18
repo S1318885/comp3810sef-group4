@@ -5,6 +5,7 @@
 A full-stack **Task Management Application** built with **Node.js, Express, MongoDB, Passport.js**, and **EJS templating**. Supports both local username/password login and Google OAuth 2.0 authentication.
 
 Live Demo: [https://comp3810sef-group4.onrender.com ](https://comp3810sef-group4.onrender.com) 
+
 (Hosted on Render – may take a few seconds to wake up)
 
 ---
@@ -72,13 +73,18 @@ Live Demo: [https://comp3810sef-group4.onrender.com ](https://comp3810sef-group4
 ### Local Setup (Development)
  **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/task-manager-auth.git
-   cd task-manager-auth
-   npm install
-   npm start
+   # 1. Clone the repo
+git clone https://github.com/your-username/task-manager-auth.git
+cd task-manager-auth
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the server
+npm start
    ```
 
-###RESTful API Endpoints (for testing with cURL/Postman)
+RESTful API Endpoints (for testing with cURL/Postman)
 ```bash
 # Get all tasks
 curl http://localhost:3000/api/tasks
