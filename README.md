@@ -50,31 +50,11 @@ Live Demo: [https://comp3810sef-group4.onrender.com ](https://comp3810sef-group4
 
 ---
 
-### Project Structure
-├── app.js                  # Main server file
-├── config/
-│   └── passport.js         # Passport Google Strategy
-├── models/
-│   ├── task.js             # Task Schema
-│   └── user.js             # User Schema
-├── views/                  # EJS templates
-│   ├── login.ejs
-│   ├── register.ejs
-│   ├── crud.ejs
-│   └── edit.ejs
-├── public/
-│   └── style.css           # Full custom styling
-├── package.json
-└── README.md
-
-
----
-
 ### Local Setup (Development)
  **Clone the repository**
    ```bash
    # 1. Clone the repo
-git clone https://github.com/your-username/task-manager-auth.git
+git clone [https://github.com/your-username/task-manager-auth.git](https://github.com/S1318885/comp3810sef-group4.git)
 cd task-manager-auth
 
 # 2. Install dependencies
